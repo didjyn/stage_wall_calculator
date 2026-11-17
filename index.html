@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <title>간이 목공 벽 면적 및 자재 산출 프로그램</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -32,9 +32,9 @@
     }
   </script>
   <style>
-    /* 커스텀 스크롤바 및 도면 그리드 배경 */
     body {
       font-family: 'Noto Sans KR', 'Inter', sans-serif;
+      touch-action: manipulation;
     }
     .blueprint-grid {
       background-color: #0b1120;
@@ -45,12 +45,10 @@
         linear-gradient(to bottom, rgba(56, 189, 248, 0.16) 1px, transparent 1px);
       background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
     }
-    /* 숫자 입력 화살표 스타일 정돈 */
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button {
       opacity: 1;
     }
-    /* 커스텀 스크롤바 */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -69,17 +67,16 @@
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased selection:bg-sky-500 selection:text-white">
 
-  <!-- 메인 앱 컨테이너: 데스크톱에서는 좌우 분할(좌측 고정), 모바일에서는 상하 스택 -->
-  <div class="min-h-screen lg:h-screen lg:overflow-hidden flex flex-col lg:flex-row">
+  <!-- 메인 앱 컨테이너: 데스크톱 및 모바일 반응형 레이아웃 분할 -->
+  <div class="h-screen overflow-hidden flex flex-col lg:flex-row">
 
-    <!-- ==================== 좌측 영역: 고정 산출 도면 뷰어 ==================== -->
-    <section class="w-full lg:w-[60%] xl:w-[63%] h-[52vh] lg:h-screen lg:sticky lg:top-0 flex flex-col blueprint-grid text-slate-100 border-b lg:border-b-0 lg:border-r border-slate-700/80 relative select-none">
+    <!-- ==================== 좌측 영역: 고정 산출 도면 뷰어 (모바일에서 상단 고정) ==================== -->
+    <section id="viewer-section" class="w-full lg:w-[60%] xl:w-[63%] h-[45vh] lg:h-screen flex flex-col blueprint-grid text-slate-100 border-b lg:border-b-0 lg:border-r border-slate-700/80 relative select-none shrink-0">
       
       <!-- 좌측 상단 도면 헤더 & 컨트롤 바 -->
       <header class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 z-10">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-lg bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-sky-400">
-            <!-- 목공/도면 아이콘 SVG -->
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
               <line x1="3" y1="9" x2="21" y2="9"></line>
@@ -122,8 +119,8 @@
         </button>
       </div>
 
-      <!-- 캔버스 컨테이너 (드래그 팬 및 호버 툴팁 지원) -->
-      <div id="canvas-wrapper" class="flex-1 relative overflow-hidden cursor-grab active:cursor-grabbing">
+      <!-- 캔버스 컨테이너 (드래그 팬, 핀치 줌 및 호버 툴팁 지원) -->
+      <div id="canvas-wrapper" class="flex-1 relative overflow-hidden cursor-grab active:cursor-grabbing touch-none">
         <canvas id="wall-canvas" class="block w-full h-full"></canvas>
 
         <!-- 호버 툴팁 -->
@@ -152,15 +149,15 @@
             </span>
           </div>
           <div class="hidden sm:block bg-slate-900/85 backdrop-blur-md border border-slate-700/80 rounded-lg px-2.5 py-1 text-[11px] text-slate-400 font-mono">
-            드래그: 이동 · 휠: 확대/축소
+            드래그: 이동 · 휠/핀치: 확대/축소
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ==================== 우측 영역: 입력 제어 및 필요 자재 산출내역 ==================== -->
-    <aside class="w-full lg:w-[40%] xl:w-[37%] lg:h-screen lg:overflow-y-auto bg-slate-50 flex flex-col">
-      <div class="p-4 sm:p-5 space-y-4 flex-1">
+    <!-- ==================== 우측 영역: 입력 제어 및 필요 자재 산출내역 (스크롤 가능) ==================== -->
+    <aside class="w-full lg:w-[40%] xl:w-[37%] h-[55vh] lg:h-screen overflow-y-auto bg-slate-50 flex flex-col">
+      <div class="p-4 sm:p-5 space-y-4 flex-1 pb-16">
 
         <!-- 1. 전체 산출 면적 및 오차 보정 설정 카드 -->
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
@@ -193,7 +190,7 @@
           </div>
 
           <!-- 오차 자동 보정 허용치 & 배열 옵션 -->
-          <div class="grid grid-cols-2 gap-2.5 pt-2.5 border-t border-slate-100 mb-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2.5 border-t border-slate-100 mb-3">
             <div>
               <label for="input-tolerance" class="block text-[11px] font-semibold text-slate-600 mb-1">규격 맞춤 오차 허용 (±)</label>
               <div class="flex items-center gap-1.5">
@@ -203,16 +200,27 @@
                 <button type="button" id="btn-reset-tolerance" title="기본 50mm로 복원" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600">50mm</button>
               </div>
             </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-600 mb-1">자재 회전 배치 허용</label>
-              <label class="inline-flex items-center gap-2 cursor-pointer mt-0.5">
-                <input type="checkbox" id="chk-allow-rotate" checked class="w-4 h-4 rounded text-sky-600 border-slate-300 focus:ring-sky-500">
-                <span class="text-xs text-slate-700 font-medium">가로·세로 회전 허용</span>
-              </label>
+            <div class="space-y-2">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">자재 회전 배치 허용</label>
+                <label class="inline-flex items-center gap-2 cursor-pointer mt-0.5">
+                  <input type="checkbox" id="chk-allow-rotate" checked class="w-4 h-4 rounded text-sky-600 border-slate-300 focus:ring-sky-500">
+                  <span class="text-xs text-slate-700 font-medium">가로·세로 회전 허용</span>
+                </label>
+              </div>
             </div>
           </div>
 
-          <!-- 오차 보정 알림 배너 (우측 패널 내 상세 안내) -->
+          <!-- 자재 수량 최소화 체크박스 (자재 회전 허용 아래쪽, 기본 체크) -->
+          <div class="pt-2.5 border-t border-slate-100 mb-3">
+            <label class="inline-flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" id="chk-minimize-qty" checked class="w-4 h-4 rounded text-sky-600 border-slate-300 focus:ring-sky-500">
+              <span class="text-xs text-slate-800 font-bold">자재 수량 최소화 (체크: 크기 큰 자재 우선 / 해제: 자재 종류 최소화)</span>
+            </label>
+            <p class="text-[10px] text-slate-500 mt-0.5 ml-6">체크 시 큰 자재를 우선 배치하여 전체 장수를 줄이고, 해제 시 동일 규격/종류 위주로 산출합니다.</p>
+          </div>
+
+          <!-- 오차 보정 알림 배너 -->
           <div id="panel-tolerance-alert" class="hidden mb-3 p-3 rounded-lg bg-amber-50 border border-amber-300 text-xs text-amber-900 shadow-sm">
             <div class="flex items-start justify-between gap-2">
               <div class="flex items-start gap-2">
@@ -245,7 +253,7 @@
               <button type="button" data-w="4880" data-h="2440" class="preset-btn px-2 py-1 text-[11px] font-mono bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-sky-700 border border-slate-200 rounded transition">
                 4880×2440 (정규격)
               </button>
-              <button type="button" data-w="3620" data-h="2410" class="preset-btn px-2 py-1 text-[11px] font-mono bg-amber-50/70 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded transition" title="±50mm 보정 시 3660×2440으로 자동 맞춤">
+              <button type="button" data-w="3620" data-h="2410" class="preset-btn px-2 py-1 text-[11px] font-mono bg-amber-50/70 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded transition" title="±50mm 보정 시 자동 맞춤">
                 3620×2410 (오차보정 예시)
               </button>
               <button type="button" data-w="5460" data-h="2730" class="preset-btn px-2 py-1 text-[11px] font-mono bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-sky-700 border border-slate-200 rounded transition">
@@ -258,64 +266,76 @@
           </div>
         </div>
 
-        <!-- 2. 정해진 규격 자재 관리 카드 (탭: 기본 자재 목록 / 자재 추가) -->
+        <!-- 2. 규격 자재 관리 카드 (접기/펼치기 지원, 탭: 기본 자재 목록 / 자재 추가) -->
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <!-- 탭 헤더 -->
-          <div class="flex items-center justify-between bg-slate-100/80 border-b border-slate-200 px-3 pt-2.5">
+          <div id="mat-card-header" class="flex flex-wrap items-center justify-between gap-1.5 bg-slate-100/80 border-b border-slate-200 px-3 pt-2.5">
             <div class="flex items-center gap-1">
               <button type="button" id="tab-btn-list" class="px-3 py-2 text-xs font-bold rounded-t-lg bg-white text-sky-700 border-t border-x border-slate-200 -mb-px flex items-center gap-1.5">
                 <span>기본·등록 자재 목록</span>
-                <span id="badge-active-mat-count" class="px-1.5 py-0.2 rounded-full bg-sky-100 text-sky-700 font-mono text-[10px]">24</span>
+                <span id="badge-active-mat-count" class="px-1.5 py-0.2 rounded-full bg-sky-100 text-sky-700 font-mono text-[10px]">25</span>
               </button>
               <button type="button" id="tab-btn-add" class="px-3 py-2 text-xs font-semibold rounded-t-lg text-slate-600 hover:text-slate-900 flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-sky-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 <span>자재 추가</span>
               </button>
             </div>
-            <div id="list-bulk-actions" class="flex items-center gap-1 pb-1.5">
-              <button type="button" id="btn-mat-all" class="text-[11px] font-medium px-2 py-0.5 rounded bg-white hover:bg-slate-200 text-slate-700 border border-slate-200 transition">전체선택</button>
-              <button type="button" id="btn-mat-none" class="text-[11px] font-medium px-2 py-0.5 rounded bg-white hover:bg-slate-200 text-slate-500 border border-slate-200 transition">전체해제</button>
+            <div class="flex items-center gap-1 pb-1.5 ml-auto">
+              <div id="list-bulk-actions" class="flex items-center gap-1">
+                <button type="button" id="btn-mat-all" class="text-[11px] font-medium px-2 py-0.5 rounded bg-white hover:bg-slate-200 text-slate-700 border border-slate-200 transition">전체선택</button>
+                <button type="button" id="btn-mat-none" class="text-[11px] font-medium px-2 py-0.5 rounded bg-white hover:bg-slate-200 text-slate-500 border border-slate-200 transition">전체해제</button>
+              </div>
+              <!-- 접기 / 펼치기 토글 버튼 -->
+              <button type="button" id="btn-toggle-mat-section" title="자재목록 접기/펼치기" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-200/80 hover:bg-slate-300 text-slate-700 border border-slate-300 transition flex items-center gap-1">
+                <span id="toggle-mat-label">접기</span>
+                <svg id="toggle-mat-icon" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+              </button>
             </div>
           </div>
 
-          <!-- 탭 1: 규격 자재 목록 (24종 그룹별 + 사용자 추가 자재) -->
-          <div id="tab-content-list" class="p-3.5 max-h-[290px] overflow-y-auto space-y-3">
-            <!-- JS로 그룹별 체크박스 렌더링 -->
-          </div>
-
-          <!-- 탭 2: 사용자 자재 추가 폼 -->
-          <div id="tab-content-add" class="hidden p-4 space-y-3 bg-slate-50/50">
-            <div class="text-xs text-slate-600">
-              기본 24종 외에 현장에서 보유하거나 추가로 사용할 <strong>고정 규격 판재</strong>를 등록하세요.
-            </div>
-            <div class="grid grid-cols-2 gap-2.5">
-              <div>
-                <label for="add-mat-w" class="block text-[11px] font-semibold text-slate-600 mb-1">자재 가로 (mm) *</label>
-                <input type="number" id="add-mat-w" placeholder="예: 1200" min="50" max="10000" step="10"
-                  class="w-full font-mono text-xs font-bold bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500">
-              </div>
-              <div>
-                <label for="add-mat-h" class="block text-[11px] font-semibold text-slate-600 mb-1">자재 세로 (mm) *</label>
-                <input type="number" id="add-mat-h" placeholder="예: 2400" min="50" max="10000" step="10"
-                  class="w-full font-mono text-xs font-bold bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500">
-              </div>
-            </div>
-            <div>
-              <label for="add-mat-note" class="block text-[11px] font-semibold text-slate-600 mb-1">자재명 / 메모 (선택)</label>
-              <div class="flex gap-2">
-                <input type="text" id="add-mat-note" placeholder="예: MDF 9T, 석고보드 특판 등" maxlength="24"
-                  class="flex-1 text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                <button type="button" id="btn-submit-add-mat" class="px-4 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition shadow-sm shrink-0">
-                  등록 및 적용
-                </button>
-              </div>
+          <!-- 접고 펼 수 있는 자재 관리 본문 컨테이너 -->
+          <div id="mat-card-body">
+            <!-- 탭 1: 규격 자재 목록 (그룹별 목록 및 각 그룹별 전체 선택/해제 체크박스 포함) -->
+            <div id="tab-content-list" class="p-3.5 max-h-[340px] overflow-y-auto space-y-3">
+              <!-- JS로 그룹별 렌더링 -->
             </div>
 
-            <!-- 등록된 사용자 추가 자재 목록 미리보기 -->
-            <div class="pt-2 border-t border-slate-200">
-              <div class="text-[11px] font-semibold text-slate-600 mb-1.5">사용자 추가 등록 자재 (<span id="custom-mat-count">0</span>종)</div>
-              <div id="custom-mat-list" class="space-y-1.5 max-h-[120px] overflow-y-auto">
-                <div class="text-[11px] text-slate-400 italic py-2 text-center">추가된 사용자 자재가 없습니다.</div>
+            <!-- 탭 2: 사용자 자재 추가 폼 -->
+            <div id="tab-content-add" class="hidden p-4 space-y-3 bg-slate-50/50">
+              <div class="text-xs text-slate-600">
+                기본 규격 외에 현장에서 보유하거나 추가로 사용할 <strong>고정 규격 판재</strong>를 등록하세요.
+              </div>
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label for="add-mat-w" class="block text-[11px] font-semibold text-slate-600 mb-1">자재 가로 (mm) *</label>
+                  <input type="number" id="add-mat-w" placeholder="예: 1200" min="50" max="10000" step="10"
+                    class="w-full font-mono text-xs font-bold bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                </div>
+                <div>
+                  <label for="add-mat-h" class="block text-[11px] font-semibold text-slate-600 mb-1">자재 세로 (mm) *</label>
+                  <input type="number" id="add-mat-h" placeholder="예: 2400" min="50" max="10000" step="10"
+                    class="w-full font-mono text-xs font-bold bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                </div>
+              </div>
+              <div>
+                <label for="add-mat-note" class="block text-[11px] font-semibold text-slate-600 mb-1">자재명 / 메모 (선택)</label>
+                <div class="flex gap-2">
+                  <input type="text" id="add-mat-note" placeholder="예: MDF 9T 등" maxlength="24"
+                    class="flex-1 text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                  <button type="button" id="btn-submit-add-mat" class="px-4 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition shadow-sm shrink-0">
+                    등록 및 적용
+                  </button>
+                </div>
+              </div>
+
+              <!-- 등록된 사용자 추가 자재 목록 미리보기 -->
+              <div class="pt-2 border-t border-slate-200">
+                <div class="text-[11px] font-semibold text-slate-600 mb-1.5">사용자 추가 등록 자재 (<span id="custom-mat-count">0</span>종)</div>
+                <div id="custom-mat-list" class="space-y-1.5 max-h-[120px] overflow-y-auto">
+                  <div class="text-[11px] text-slate-400 italic py-2 text-center">추가된 사용자 자재가 없습니다.</div>
+                </div>
               </div>
             </div>
           </div>
@@ -384,7 +404,7 @@
             </div>
           </div>
 
-          <!-- [B] 추가 제작이 필요한 자재 산출 표 (미산출 영역 발생 시 강조 표시) -->
+          <!-- [B] 추가 제작이 필요한 자재 산출 표 -->
           <div id="bom-custom-section" class="hidden">
             <div class="flex items-center justify-between mb-1.5">
               <span class="text-xs font-bold text-rose-700 flex items-center gap-1.5">
@@ -429,14 +449,17 @@
 
   <script>
     /**
-     * 간이 목공 벽체 규격 자재 산출 프로그램 v2.0
-     * - 24종의 고정 규격 자재 + 사용자 추가 규격 자재 지원
-     * - ±50mm(사용자 조정 가능) 오차 허용 범위 내 기성 규격 자재 자동 맞춤 보정 및 알림
-     * - 기성 자재로 채우지 못한 잔여 영역을 '추가 제작이 필요한 자재'로 자동 분리 산출
+     * 간이 목공 벽체 규격 자재 산출 프로그램 v2.3
+     * - 자재목록 탭 접기/펼치기 지원
+     * - 1500*1820 기본자재 추가
+     * - 800~300 자재를 800, 700, 600, 500, 400, 300 계열로 개별 분리
+     * - 각 목록 그룹별 전체 선택/해제 체크박스 지원
+     * - 자재 수량 최소화 (크기 우선 vs 종류 최소화) 옵션 지원
      */
 
-    // 1. 기본 24종 규격 자재 목록 정의 (그룹 분류)
     const DEFAULT_MATERIALS = [
+      // 1500 계열
+      { id: 'def-0', group: '1500 계열', w: 1500, h: 1820, note: '광폭 판재', enabled: true, isCustom: false },
       // 1220 계열 (6종)
       { id: 'def-1', group: '1220 계열', w: 1220, h: 2440, note: '4×8 표준', enabled: true, isCustom: false },
       { id: 'def-2', group: '1220 계열', w: 1220, h: 2200, note: '', enabled: true, isCustom: false },
@@ -452,31 +475,36 @@
       { id: 'def-10', group: '910 계열', w: 910, h: 2730, note: '3×9 장척', enabled: true, isCustom: false },
       { id: 'def-11', group: '910 계열', w: 910, h: 1820, note: '3×6 표준', enabled: true, isCustom: false },
       { id: 'def-12', group: '910 계열', w: 910, h: 1500, note: '', enabled: true, isCustom: false },
-      // 800~300 계열 (12종)
-      { id: 'def-13', group: '800~300 계열', w: 800, h: 2440, note: '', enabled: true, isCustom: false },
-      { id: 'def-14', group: '800~300 계열', w: 800, h: 1820, note: '', enabled: true, isCustom: false },
-      { id: 'def-15', group: '800~300 계열', w: 700, h: 2440, note: '', enabled: true, isCustom: false },
-      { id: 'def-16', group: '800~300 계열', w: 700, h: 1820, note: '', enabled: true, isCustom: false },
-      { id: 'def-17', group: '800~300 계열', w: 600, h: 2440, note: '', enabled: true, isCustom: false },
-      { id: 'def-18', group: '800~300 계열', w: 600, h: 1820, note: '', enabled: true, isCustom: false },
-      { id: 'def-19', group: '800~300 계열', w: 500, h: 2440, note: '', enabled: true, isCustom: false },
-      { id: 'def-20', group: '800~300 계열', w: 500, h: 1820, note: '', enabled: true, isCustom: false },
-      { id: 'def-21', group: '800~300 계열', w: 400, h: 2440, note: '', enabled: true, isCustom: false },
-      { id: 'def-22', group: '800~300 계열', w: 400, h: 1820, note: '', enabled: true, isCustom: false },
-      { id: 'def-23', group: '800~300 계열', w: 300, h: 2440, note: '', enabled: true, isCustom: false },
-      { id: 'def-24', group: '800~300 계열', w: 300, h: 1820, note: '', enabled: true, isCustom: false },
+      // 800 계열
+      { id: 'def-13', group: '800 계열', w: 800, h: 2440, note: '', enabled: true, isCustom: false },
+      { id: 'def-14', group: '800 계열', w: 800, h: 1820, note: '', enabled: true, isCustom: false },
+      // 700 계열
+      { id: 'def-15', group: '700 계열', w: 700, h: 2440, note: '', enabled: true, isCustom: false },
+      { id: 'def-16', group: '700 계열', w: 700, h: 1820, note: '', enabled: true, isCustom: false },
+      // 600 계열
+      { id: 'def-17', group: '600 계열', w: 600, h: 2440, note: '', enabled: true, isCustom: false },
+      { id: 'def-18', group: '600 계열', w: 600, h: 1820, note: '', enabled: true, isCustom: false },
+      // 500 계열
+      { id: 'def-19', group: '500 계열', w: 500, h: 2440, note: '', enabled: true, isCustom: false },
+      { id: 'def-20', group: '500 계열', w: 500, h: 1820, note: '', enabled: true, isCustom: false },
+      // 400 계열
+      { id: 'def-21', group: '400 계열', w: 400, h: 2440, note: '', enabled: true, isCustom: false },
+      { id: 'def-22', group: '400 계열', w: 400, h: 1820, note: '', enabled: true, isCustom: false },
+      // 300 계열
+      { id: 'def-23', group: '300 계열', w: 300, h: 2440, note: '', enabled: true, isCustom: false },
+      { id: 'def-24', group: '300 계열', w: 300, h: 1820, note: '', enabled: true, isCustom: false },
     ];
 
     const PANEL_PALETTE = [
-      { bg: '#0284c7', border: '#7dd3fc', badge: 'bg-sky-500' },     // Sky
-      { bg: '#0d9488', border: '#5eead4', badge: 'bg-teal-500' },    // Teal
-      { bg: '#2563eb', border: '#93c5fd', badge: 'bg-blue-600' },    // Blue
-      { bg: '#059669', border: '#6ee7b7', badge: 'bg-emerald-600' }, // Emerald
-      { bg: '#4f46e5', border: '#a5b4fc', badge: 'bg-indigo-600' },  // Indigo
-      { bg: '#d97706', border: '#fcd34d', badge: 'bg-amber-600' },   // Amber
-      { bg: '#7c3aed', border: '#c4b5fd', badge: 'bg-violet-600' },  // Violet
-      { bg: '#0891b2', border: '#67e8f9', badge: 'bg-cyan-600' },    // Cyan
-      { bg: '#475569', border: '#cbd5e1', badge: 'bg-slate-600' },   // Slate
+      { bg: '#0284c7', border: '#7dd3fc', badge: 'bg-sky-500' },
+      { bg: '#0d9488', border: '#5eead4', badge: 'bg-teal-500' },
+      { bg: '#2563eb', border: '#93c5fd', badge: 'bg-blue-600' },
+      { bg: '#059669', border: '#6ee7b7', badge: 'bg-emerald-600' },
+      { bg: '#4f46e5', border: '#a5b4fc', badge: 'bg-indigo-600' },
+      { bg: '#d97706', border: '#fcd34d', badge: 'bg-amber-600' },
+      { bg: '#7c3aed', border: '#c4b5fd', badge: 'bg-violet-600' },
+      { bg: '#0891b2', border: '#67e8f9', badge: 'bg-cyan-600' },
+      { bg: '#475569', border: '#cbd5e1', badge: 'bg-slate-600' },
     ];
 
     const state = {
@@ -487,12 +515,14 @@
       tolerance: 50,
       forceExact: false,
       allowRotate: true,
+      minimizeQty: true,
       toleranceApplied: false,
+      isMatCollapsed: false,
+      activeTab: 'list',
       materials: DEFAULT_MATERIALS.map(m => ({ ...m })),
-      panels: [],          // 도면에 배치된 모든 패널 (기성 자재 + 추가 제작 자재)
-      stdBom: [],          // 기성 규격 자재 BOM
-      customBom: [],       // 추가 제작 필요 자재 BOM
-      // 캔버스 뷰 상태
+      panels: [],
+      stdBom: [],
+      customBom: [],
       zoom: 1,
       panX: 0,
       panY: 0,
@@ -501,19 +531,20 @@
       dragStartY: 0,
       hoveredPanelIndex: -1,
       sizeColorMap: new Map(),
+      touchStartDist: 0,
+      touchStartZoom: 1,
     };
 
-    // DOM 참조
     const els = {
       inputW: document.getElementById('input-width'),
       inputH: document.getElementById('input-height'),
       inputTol: document.getElementById('input-tolerance'),
       chkRotate: document.getElementById('chk-allow-rotate'),
+      chkMinimizeQty: document.getElementById('chk-minimize-qty'),
       canvasWrapper: document.getElementById('canvas-wrapper'),
       canvas: document.getElementById('wall-canvas'),
       canvasDimSubtitle: document.getElementById('canvas-dim-subtitle'),
       zoomLevelText: document.getElementById('zoom-level-text'),
-      // 오차 알림 배너
       canvasTolBanner: document.getElementById('canvas-tolerance-banner'),
       canvasTolText: document.getElementById('canvas-tolerance-text'),
       panelTolAlert: document.getElementById('panel-tolerance-alert'),
@@ -521,14 +552,17 @@
       alertTolVal: document.getElementById('alert-tol-val'),
       panelExactAlert: document.getElementById('panel-exact-forced-alert'),
       restoreTolVal: document.getElementById('restore-tol-val'),
-      // 툴팁
       tooltip: document.getElementById('panel-tooltip'),
       tooltipColorDot: document.getElementById('tooltip-color-dot'),
       tooltipTitle: document.getElementById('tooltip-title'),
       tooltipArea: document.getElementById('tooltip-area'),
       tooltipPos: document.getElementById('tooltip-pos'),
       tooltipStatus: document.getElementById('tooltip-status'),
-      // 자재 관리 탭
+      matCardHeader: document.getElementById('mat-card-header'),
+      matCardBody: document.getElementById('mat-card-body'),
+      btnToggleMatSection: document.getElementById('btn-toggle-mat-section'),
+      toggleMatLabel: document.getElementById('toggle-mat-label'),
+      toggleMatIcon: document.getElementById('toggle-mat-icon'),
       tabBtnList: document.getElementById('tab-btn-list'),
       tabBtnAdd: document.getElementById('tab-btn-add'),
       tabContentList: document.getElementById('tab-content-list'),
@@ -537,7 +571,6 @@
       badgeActiveMatCount: document.getElementById('badge-active-mat-count'),
       customMatCount: document.getElementById('custom-mat-count'),
       customMatList: document.getElementById('custom-mat-list'),
-      // KPI & BOM
       kpiTotalArea: document.getElementById('kpi-total-area'),
       kpiPyeong: document.getElementById('kpi-pyeong'),
       kpiStdPieces: document.getElementById('kpi-std-pieces'),
@@ -551,22 +584,28 @@
       customBomSubtotal: document.getElementById('custom-bom-subtotal'),
       bomCustomBody: document.getElementById('bom-custom-body'),
       bomGrandTotal: document.getElementById('bom-grand-total'),
-      // 토스트
       toastMsg: document.getElementById('toast-msg'),
       toastText: document.getElementById('toast-text'),
     };
 
     const ctx = els.canvas.getContext('2d');
 
-    /**
-     * 2. 고정 규격 자재 기반 2D 벽체 분할·배열 알고리즘
-     * - 활성화된 기성 자재(회전 허용 시 W↔H 스왑 포함)만을 사용하여 주어진 (W, H) 영역을 채움
-     * - 단(Row) 또는 열(Column) 기반 2D 기요틴(Guillotine) 그리드 분할을 탐색하여:
-     *   1) 추가 제작 필요 면적(미산출 영역) 최소화
-     *   2) 전체 사용 자재 장수 최소화
-     *   3) 단/열의 일관된 정렬을 달성하는 최적 배치 도출
-     */
-    function solve2DLayoutForSize(W, H, activeMaterials, allowRotate) {
+    function setMatCollapsed(collapsed) {
+      state.isMatCollapsed = collapsed;
+      if (collapsed) {
+        els.matCardBody.classList.add('hidden');
+        els.matCardHeader.classList.remove('border-b');
+        els.toggleMatLabel.textContent = '펼치기';
+        els.toggleMatIcon.classList.add('rotate-180');
+      } else {
+        els.matCardBody.classList.remove('hidden');
+        els.matCardHeader.classList.add('border-b');
+        els.toggleMatLabel.textContent = '접기';
+        els.toggleMatIcon.classList.remove('rotate-180');
+      }
+    }
+
+    function solve2DLayoutForSize(W, H, activeMaterials, allowRotate, minimizeQty) {
       if (activeMaterials.length === 0) {
         return {
           panels: [{ x: 0, y: 0, w: W, h: H, isStandard: false, rotated: false, matName: '추가 제작 자재' }],
@@ -576,32 +615,37 @@
         };
       }
 
-      // 방향별 후보 자재 리스트 생성 (기본 방향 + 회전 허용 시 90도 회전 규격)
       const orientations = [];
       const seenOrient = new Set();
       for (const m of activeMaterials) {
         const key1 = `${m.w}x${m.h}`;
         if (!seenOrient.has(key1)) {
           seenOrient.add(key1);
-          orientations.push({ w: m.w, h: m.h, rotated: false, origW: m.w, origH: m.h, note: m.note });
+          orientations.push({ w: m.w, h: m.h, rotated: false, origW: m.w, origH: m.h, note: m.note, area: m.w * m.h });
         }
         if (allowRotate && m.w !== m.h) {
           const key2 = `${m.h}x${m.w}`;
           if (!seenOrient.has(key2)) {
             seenOrient.add(key2);
-            orientations.push({ w: m.h, h: m.w, rotated: true, origW: m.w, origH: m.h, note: m.note });
+            orientations.push({ w: m.h, h: m.w, rotated: true, origW: m.w, origH: m.h, note: m.note, area: m.w * m.h });
           }
         }
       }
 
-      // 1D 최적 분할 헬퍼: 허용된 치수 리스트로 target 길이를 채우는 모든 유효 조합(또는 최적 조합) 탐색
+      orientations.sort((a, b) => {
+        if (minimizeQty) {
+          return b.area - a.area;
+        } else {
+          return (b.w * b.h) - (a.w * a.h);
+        }
+      });
+
       function find1DCombinations(target, allowedDims, maxCombos = 12) {
-        const dims = [...new Set(allowedDims)].filter(d => d > 0 && d <= target).sort((a, b) => b - a);
+        const dims = [...new Set(allowedDims)].filter(d => d > 0 && d <= target).sort((a, b) => minimizeQty ? b - a : a - b);
         if (dims.length === 0) {
           return [[{ len: target, isStd: false }]];
         }
 
-        // DP로 도달 가능한 최대 길이 및 최소 조각 수 계산
         const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
         let g = target;
         for (const d of dims) g = gcd(g, d);
@@ -626,7 +670,6 @@
         const results = [];
         const remainder = target - bestReach * g;
 
-        // 역추적 DFS로 최소 조각 수를 만족하는 조합 최대 maxCombos개 추출
         function backtrack(rem, startIdx, current) {
           if (results.length >= maxCombos) return;
           if (rem === 0) {
@@ -640,7 +683,7 @@
             const sd = d / g;
             if (rem >= sd && dp[rem - sd] + 1 === dp[rem]) {
               current.push(d);
-              backtrack(rem - sd, i, current);
+              backtrack(rem - sd, minimizeQty ? i : 0, current);
               current.pop();
             }
           }
@@ -653,7 +696,6 @@
         return results;
       }
 
-      // 전략 A: 수평 단(Row-based) 분할 - 먼저 세로 높이(H)를 후보 높이들로 분할하고, 각 단의 높이 h에 맞는 폭 w 자재들로 가로(W)를 채움
       function evaluateRowBased() {
         const candidateHeights = [...new Set(orientations.map(o => o.h))];
         const hCombos = find1DCombinations(H, candidateHeights, 10);
@@ -667,7 +709,6 @@
 
           for (const hSeg of hSegs) {
             if (!hSeg.isStd) {
-              // 세로 잔여 구간 전체는 추가 제작 자재
               planPanels.push({
                 x: 0, y: curY, w: W, h: hSeg.len,
                 isStandard: false, rotated: false,
@@ -678,7 +719,6 @@
               continue;
             }
 
-            // 해당 단 높이(hSeg.len)를 가진 규격 자재들의 폭 목록 추출
             const matchingOrients = orientations.filter(o => o.h === hSeg.len);
             const allowedWidths = matchingOrients.map(o => o.w);
             const wCombos = find1DCombinations(W, allowedWidths, 1);
@@ -698,7 +738,6 @@
                 });
                 stdPieces++;
               } else {
-                // 가로 잔여 구간은 추가 제작 자재
                 planPanels.push({
                   x: curX, y: curY, w: wSeg.len, h: hSeg.len,
                   isStandard: false, rotated: false,
@@ -723,7 +762,6 @@
         return bestPlan;
       }
 
-      // 전략 B: 수직 열(Column-based) 분할 - 먼저 가로 폭(W)을 후보 폭들로 분할하고, 각 열의 폭 w에 맞는 높이 h 자재들로 세로(H)를 채움
       function evaluateColBased() {
         const candidateWidths = [...new Set(orientations.map(o => o.w))];
         const wCombos = find1DCombinations(W, candidateWidths, 10);
@@ -802,9 +840,6 @@
       return rowPlan.totalPieces <= colPlan.totalPieces ? rowPlan : colPlan;
     }
 
-    /**
-     * 3. ±50mm(tolerance) 이내 오차 보정 탐색 및 최종 벽체 산출 실행
-     */
     function calculateWallLayout() {
       const targetW = Math.max(100, Math.min(100000, parseInt(els.inputW.value, 10) || 100));
       const targetH = Math.max(100, Math.min(100000, parseInt(els.inputH.value, 10) || 100));
@@ -814,19 +849,16 @@
       state.targetHeight = targetH;
       state.tolerance = Math.max(0, Math.min(200, parseInt(els.inputTol.value, 10) || 0));
       state.allowRotate = els.chkRotate.checked;
+      state.minimizeQty = els.chkMinimizeQty.checked;
 
       const activeMaterials = state.materials.filter(m => m.enabled);
 
-      // 1차: 입력된 목표 치수 그대로 산출
       let bestW = targetW;
       let bestH = targetH;
-      let bestSolution = solve2DLayoutForSize(targetW, targetH, activeMaterials, state.allowRotate);
+      let bestSolution = solve2DLayoutForSize(targetW, targetH, activeMaterials, state.allowRotate, state.minimizeQty);
       let appliedTolerance = false;
 
-      // 2차: 오차 보정이 켜져 있고(tol > 0), 목표 치수 그대로일 때 추가 제작 영역이 발생한다면
-      // ±tol 범위 이내에서 기성 규격 자재만으로 딱 떨어지는(customArea === 0) 최적 치수 탐색
       if (tol > 0 && bestSolution.customArea > 0 && activeMaterials.length > 0) {
-        // 활성화된 자재들로 조합 가능한 가로/세로 길이 집합 생성 (target ± tol 범위 내)
         const dims = new Set();
         for (const m of activeMaterials) {
           dims.add(m.w);
@@ -839,8 +871,6 @@
           const maxVal = target + maxTol;
           const reachable = new Set([0]);
           const validCandidates = [];
-
-          // BFS/DP로 maxVal까지 도달 가능한 조합 길이 탐색
           const queue = [0];
           while (queue.length > 0) {
             const curr = queue.shift();
@@ -855,14 +885,11 @@
               }
             }
           }
-          // 목표 치수와의 절대 오차(|cand - target|)가 작은 순으로 정렬
           return validCandidates.sort((a, b) => Math.abs(a - target) - Math.abs(b - target));
         }
 
         const candWs = getReachableNear(targetW, tol);
         const candHs = getReachableNear(targetH, tol);
-
-        // 목표 치수와 오차가 가장 작은 (w, h) 쌍부터 검증
         const pairs = [];
         for (const cw of candWs) {
           for (const ch of candHs) {
@@ -873,11 +900,10 @@
         }
         pairs.sort((a, b) => a.diffSum - b.diffSum);
 
-        // 상위 후보군 검사하여 추가 제작이 0(또는 대폭 감소)인 최적 치수 채택
         const checkLimit = Math.min(pairs.length, 45);
         for (let i = 0; i < checkLimit; i++) {
           const cand = pairs[i];
-          const sol = solve2DLayoutForSize(cand.w, cand.h, activeMaterials, state.allowRotate);
+          const sol = solve2DLayoutForSize(cand.w, cand.h, activeMaterials, state.allowRotate, state.minimizeQty);
           if (sol.customArea === 0) {
             bestW = cand.w;
             bestH = cand.h;
@@ -892,7 +918,6 @@
       state.effectiveHeight = bestH;
       state.toleranceApplied = appliedTolerance;
 
-      // 패널 색상 및 BOM 집계
       state.sizeColorMap.clear();
       let colorIdx = 0;
       const stdBomMap = new Map();
@@ -909,7 +934,6 @@
           }
           colorObj = state.sizeColorMap.get(specKey);
 
-          // 기성 자재 BOM 집계 (원판 규격 기준)
           if (!stdBomMap.has(specKey)) {
             stdBomMap.set(specKey, {
               specKey,
@@ -930,7 +954,6 @@
         } else {
           colorObj = { bg: 'rgba(244, 63, 94, 0.28)', border: '#fb7185', badge: 'bg-rose-500' };
 
-          // 추가 제작 자재 BOM 집계
           if (!customBomMap.has(specKey)) {
             customBomMap.set(specKey, {
               specKey,
@@ -961,9 +984,6 @@
       fitCanvasToWall();
     }
 
-    /**
-     * 4. 우측 UI, 오차 알림 배너 및 BOM 테이블 업데이트
-     */
     function updateUI() {
       const {
         targetWidth: tW, targetHeight: tH,
@@ -975,12 +995,10 @@
       const totalAreaM2 = (eW * eH) / 1_000_000;
       const pyeong = totalAreaM2 * 0.3025;
 
-      // 상단 도면 서브타이틀
       els.canvasDimSubtitle.textContent = toleranceApplied
         ? `산출 면적: ${eW.toLocaleString()} × ${eH.toLocaleString()} mm (${totalAreaM2.toFixed(2)} ㎡) [입력: ${tW.toLocaleString()}×${tH.toLocaleString()}]`
         : `산출 면적: ${eW.toLocaleString()} × ${eH.toLocaleString()} mm (${totalAreaM2.toFixed(2)} ㎡)`;
 
-      // 오차 보정 알림 배너 처리
       els.alertTolVal.textContent = tolerance;
       els.restoreTolVal.textContent = tolerance;
 
@@ -990,7 +1008,7 @@
         const parts = [];
         if (diffW !== 0) parts.push(`가로 ${tW.toLocaleString()}mm → ${eW.toLocaleString()}mm (${diffW > 0 ? '+' : ''}${diffW}mm)`);
         if (diffH !== 0) parts.push(`세로 ${tH.toLocaleString()}mm → ${eH.toLocaleString()}mm (${diffH > 0 ? '+' : ''}${diffH}mm)`);
-        const summaryMsg = `오차 보정 적용: ${parts.join(', ')}로 자동 조정되어 추가 제작 자재 없이 산출되었습니다.`;
+        const summaryMsg = `오차 보정 적용: ${parts.join(', ')}로 자동 조정되었습니다.`;
 
         els.canvasTolBanner.classList.remove('hidden');
         els.canvasTolText.textContent = summaryMsg;
@@ -1007,7 +1025,6 @@
         }
       }
 
-      // KPI 집계
       const stdQty = stdBom.reduce((acc, item) => acc + item.qty, 0);
       const stdArea = stdBom.reduce((acc, item) => acc + item.totalArea, 0);
       const customQty = customBom.reduce((acc, item) => acc + item.qty, 0);
@@ -1031,7 +1048,6 @@
         els.kpiCustomArea.className = 'text-[10px] font-mono text-slate-400';
       }
 
-      // [A] 기성 규격 자재 테이블 렌더링
       els.stdBomSubtotal.textContent = `총 ${stdQty}장 / ${stdArea.toFixed(2)} ㎡`;
       if (stdBom.length === 0) {
         els.bomStdBody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-400 text-xs">적용된 기성 규격 자재가 없습니다.</td></tr>`;
@@ -1062,7 +1078,6 @@
         }).join('');
       }
 
-      // [B] 추가 제작이 필요한 자재 테이블 렌더링
       if (customBom.length > 0) {
         els.bomCustomSection.classList.remove('hidden');
         els.customBomSubtotal.textContent = `총 ${customQty}장 / ${customArea.toFixed(2)} ㎡`;
@@ -1088,14 +1103,10 @@
       els.bomGrandTotal.textContent = `${panels.length} 장 / ${totalAreaM2.toFixed(2)} ㎡`;
     }
 
-    /**
-     * 5. 자재 목록 UI 렌더링 및 자재 추가/삭제 관리
-     */
     function renderMaterialList() {
       const activeCount = state.materials.filter(m => m.enabled).length;
       els.badgeActiveMatCount.textContent = activeCount;
 
-      // 그룹별 분류
       const groups = new Map();
       for (const m of state.materials) {
         const gName = m.isCustom ? '사용자 추가 자재' : m.group;
@@ -1103,7 +1114,6 @@
         groups.get(gName).push(m);
       }
 
-      // 사용자 추가 자재가 있으면 최상단에 배치
       const orderedGroupNames = [];
       if (groups.has('사용자 추가 자재')) orderedGroupNames.push('사용자 추가 자재');
       for (const k of groups.keys()) {
@@ -1113,12 +1123,18 @@
       els.tabContentList.innerHTML = orderedGroupNames.map(gName => {
         const items = groups.get(gName);
         const isCustomGroup = gName === '사용자 추가 자재';
+        const allGroupChecked = items.length > 0 && items.every(m => m.enabled);
+
         return `
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="text-[11px] font-bold ${isCustomGroup ? 'text-indigo-700' : 'text-slate-500'}">${gName} (${items.length})</span>
+          <div class="border border-slate-200/80 rounded-lg p-2.5 bg-white shadow-xs">
+            <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-slate-100">
+              <span class="text-xs font-bold ${isCustomGroup ? 'text-indigo-700' : 'text-slate-700'}">${gName} (${items.length}종)</span>
+              <label class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 cursor-pointer">
+                <input type="checkbox" data-group-name="${gName}" ${allGroupChecked ? 'checked' : ''} class="group-select-all w-3.5 h-3.5 rounded text-sky-600 border-slate-300 focus:ring-sky-500">
+                <span>전체선택/해제</span>
+              </label>
             </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-1.5">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
               ${items.map(m => `
                 <label class="flex items-center justify-between gap-1.5 px-2 py-1.5 rounded-lg border text-xs cursor-pointer transition select-none
                   ${m.enabled
@@ -1143,7 +1159,6 @@
         `;
       }).join('');
 
-      // 자재 추가 탭 내 사용자 등록 자재 목록도 동기화
       const customMats = state.materials.filter(m => m.isCustom);
       els.customMatCount.textContent = customMats.length;
       if (customMats.length === 0) {
@@ -1163,9 +1178,6 @@
       }
     }
 
-    /**
-     * 6. 캔버스 크기 조정, 맞춤 및 CAD 도면 렌더링
-     */
     function resizeCanvas() {
       const rect = els.canvasWrapper.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
@@ -1213,7 +1225,6 @@
       const wallPxW = W * zoom;
       const wallPxH = H * zoom;
 
-      // 벽체 외곽 그림자
       ctx.save();
       ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
       ctx.shadowBlur = 24;
@@ -1222,7 +1233,6 @@
       ctx.fillRect(panX, panY, wallPxW, wallPxH);
       ctx.restore();
 
-      // 개별 판재 렌더링
       panels.forEach((p, idx) => {
         const px = panX + p.x * zoom;
         const py = panY + p.y * zoom;
@@ -1235,7 +1245,6 @@
         ctx.fillRect(px, py, pw, ph);
         ctx.globalAlpha = 1;
 
-        // 추가 제작 필요 자재 구간 빗금 해칭 패턴
         if (!p.isStandard) {
           ctx.save();
           ctx.beginPath();
@@ -1253,14 +1262,12 @@
           ctx.restore();
         }
 
-        // 테두리 선
         ctx.strokeStyle = isHovered ? '#ffffff' : p.color.border;
         ctx.lineWidth = isHovered ? 2.5 : 1.25;
         if (!p.isStandard) ctx.setLineDash([5, 3]);
         ctx.strokeRect(px + 0.5, py + 0.5, Math.max(0, pw - 1), Math.max(0, ph - 1));
         ctx.setLineDash([]);
 
-        // 판재 내부 치수 라벨
         if (pw >= 44 && ph >= 24) {
           const label = p.isStandard ? `${p.w}×${p.h}` : `추가제작 ${p.w}×${p.h}`;
           const fontSize = Math.max(10, Math.min(13, Math.floor(Math.min(pw / (p.isStandard ? 6.5 : 10), ph / 2.6))));
@@ -1282,7 +1289,6 @@
             ctx.fillStyle = '#ffffff';
             ctx.fillText(label, px + pw / 2, py + ph / 2 + 0.5);
           } else if (pw >= 36 && ph >= 18) {
-            // 좁은 영역 축약 라벨
             const shortLabel = `${p.w}×${p.h}`;
             ctx.fillStyle = '#ffffff';
             ctx.fillText(shortLabel, px + pw / 2, py + ph / 2 + 0.5);
@@ -1290,12 +1296,10 @@
         }
       });
 
-      // 외곽 전체 벽체 보더 강조
       ctx.strokeStyle = state.toleranceApplied ? '#fbbf24' : '#38bdf8';
       ctx.lineWidth = 2;
       ctx.strokeRect(panX, panY, wallPxW, wallPxH);
 
-      // 외곽 치수선
       drawDimensionLines(panX, panY, wallPxW, wallPxH, W, H);
     }
 
@@ -1307,7 +1311,6 @@
       ctx.lineWidth = 1;
       ctx.font = '600 12px "JetBrains Mono", monospace';
 
-      // 상단 전체 가로 치수선
       const topOffset = 26;
       const dimY = y - topOffset;
       if (dimY > 14) {
@@ -1328,9 +1331,7 @@
         drawTick(x, dimY);
         drawTick(x + w, dimY);
 
-        const wLabel = state.toleranceApplied
-          ? `W: ${realW.toLocaleString()} mm (보정됨)`
-          : `W: ${realW.toLocaleString()} mm`;
+        const wLabel = state.toleranceApplied ? `W: ${realW.toLocaleString()} mm (보정됨)` : `W: ${realW.toLocaleString()} mm`;
         const tw = ctx.measureText(wLabel).width;
         ctx.fillStyle = '#0b1120';
         ctx.fillRect(x + w / 2 - tw / 2 - 6, dimY - 9, tw + 12, 18);
@@ -1340,7 +1341,6 @@
         ctx.fillText(wLabel, x + w / 2, dimY);
       }
 
-      // 좌측 전체 세로 치수선
       const leftOffset = 28;
       const dimX = x - leftOffset;
       if (dimX > 18) {
@@ -1385,9 +1385,6 @@
       ctx.stroke();
     }
 
-    /**
-     * 7. 클립보드 복사 및 CSV 내보내기
-     */
     function showToast(message) {
       els.toastText.textContent = message;
       els.toastMsg.classList.remove('translate-y-16', 'opacity-0');
@@ -1407,9 +1404,7 @@
         `- 총 자재 수량: ${panels.length}장`,
         `----------------------------------------`,
         `[기성 규격 자재]`,
-        ...(stdBom.length > 0
-          ? stdBom.map(i => `• ${i.w} × ${i.h} mm : ${i.qty}장 (${i.totalArea.toFixed(2)} ㎡)`)
-          : ['• 없음']),
+        ...(stdBom.length > 0 ? stdBom.map(i => `• ${i.w} × ${i.h} mm : ${i.qty}장 (${i.totalArea.toFixed(2)} ㎡)`) : ['• 없음']),
       ];
 
       if (customBom.length > 0) {
@@ -1453,11 +1448,7 @@
       showToast('CSV 파일이 다운로드되었습니다.');
     }
 
-    /**
-     * 8. 이벤트 바인딩
-     */
     function bindEvents() {
-      // 입력 변경 시 강제 정밀 산출 플래그 해제 후 재계산
       const handleDimInput = () => {
         state.forceExact = false;
         calculateWallLayout();
@@ -1466,6 +1457,7 @@
       els.inputH.addEventListener('input', handleDimInput);
       els.inputTol.addEventListener('input', handleDimInput);
       els.chkRotate.addEventListener('change', calculateWallLayout);
+      els.chkMinimizeQty.addEventListener('change', calculateWallLayout);
 
       document.getElementById('btn-reset-tolerance').addEventListener('click', () => {
         els.inputTol.value = 50;
@@ -1473,7 +1465,6 @@
         calculateWallLayout();
       });
 
-      // 강제 정밀 산출 전환 및 복원 버튼
       const forceExactHandler = () => {
         state.forceExact = true;
         calculateWallLayout();
@@ -1488,7 +1479,6 @@
         showToast('±' + state.tolerance + 'mm 규격 맞춤 보정을 다시 적용합니다.');
       });
 
-      // 프리셋 버튼
       document.querySelectorAll('.preset-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           els.inputW.value = btn.dataset.w;
@@ -1498,24 +1488,32 @@
         });
       });
 
-      // 자재 관리 탭 전환 (목록 <-> 자재 추가)
+      // 자재목록 접기/펼치기 버튼
+      els.btnToggleMatSection.addEventListener('click', () => {
+        setMatCollapsed(!state.isMatCollapsed);
+      });
+
+      // 탭 전환 시 접혀있다면 자동으로 펼치기
       els.tabBtnList.addEventListener('click', () => {
+        state.activeTab = 'list';
         els.tabBtnList.className = 'px-3 py-2 text-xs font-bold rounded-t-lg bg-white text-sky-700 border-t border-x border-slate-200 -mb-px flex items-center gap-1.5';
         els.tabBtnAdd.className = 'px-3 py-2 text-xs font-semibold rounded-t-lg text-slate-600 hover:text-slate-900 flex items-center gap-1';
         els.tabContentList.classList.remove('hidden');
         els.tabContentAdd.classList.add('hidden');
         els.listBulkActions.classList.remove('hidden');
+        if (state.isMatCollapsed) setMatCollapsed(false);
       });
 
       els.tabBtnAdd.addEventListener('click', () => {
+        state.activeTab = 'add';
         els.tabBtnAdd.className = 'px-3 py-2 text-xs font-bold rounded-t-lg bg-white text-sky-700 border-t border-x border-slate-200 -mb-px flex items-center gap-1';
         els.tabBtnList.className = 'px-3 py-2 text-xs font-semibold rounded-t-lg text-slate-600 hover:text-slate-900 flex items-center gap-1.5';
         els.tabContentAdd.classList.remove('hidden');
         els.tabContentList.classList.add('hidden');
         els.listBulkActions.classList.add('hidden');
+        if (state.isMatCollapsed) setMatCollapsed(false);
       });
 
-      // 자재 전체 선택 / 전체 해제
       document.getElementById('btn-mat-all').addEventListener('click', () => {
         state.materials.forEach(m => (m.enabled = true));
         renderMaterialList();
@@ -1528,9 +1526,19 @@
         calculateWallLayout();
       });
 
-      // 자재 체크박스 토글 및 사용자 자재 삭제 이벤트 위임
       els.tabContentList.addEventListener('change', (e) => {
-        if (e.target.classList.contains('mat-checkbox')) {
+        if (e.target.classList.contains('group-select-all')) {
+          const groupName = e.target.dataset.groupName;
+          const isChecked = e.target.checked;
+          state.materials.forEach(m => {
+            const g = m.isCustom ? '사용자 추가 자재' : m.group;
+            if (g === groupName) {
+              m.enabled = isChecked;
+            }
+          });
+          renderMaterialList();
+          calculateWallLayout();
+        } else if (e.target.classList.contains('mat-checkbox')) {
           const id = e.target.dataset.matId;
           const mat = state.materials.find(m => m.id === id);
           if (mat) {
@@ -1554,7 +1562,6 @@
       els.tabContentList.addEventListener('click', handleDeleteCustomMat);
       els.customMatList.addEventListener('click', handleDeleteCustomMat);
 
-      // 사용자 자재 추가 등록
       document.getElementById('btn-submit-add-mat').addEventListener('click', () => {
         const wInput = document.getElementById('add-mat-w');
         const hInput = document.getElementById('add-mat-h');
@@ -1569,7 +1576,6 @@
           return;
         }
 
-        // 중복 체크
         const dup = state.materials.find(m => (m.w === w && m.h === h));
         if (dup) {
           dup.enabled = true;
@@ -1596,14 +1602,12 @@
 
         renderMaterialList();
         calculateWallLayout();
-        showToast(`새 자재(${w}×${h}mm)가 추가되어 즉시 적용되었습니다.`);
+        showToast(`새 자재(${w}×${h}mm)가 추가되었습니다.`);
       });
 
-      // 복사 및 CSV 버튼
       document.getElementById('btn-copy-bom').addEventListener('click', copyBomToClipboard);
       document.getElementById('btn-csv-bom').addEventListener('click', downloadBomCsv);
 
-      // 캔버스 줌 & 맞춤 컨트롤
       document.getElementById('btn-zoom-in').addEventListener('click', () => applyZoom(1.2));
       document.getElementById('btn-zoom-out').addEventListener('click', () => applyZoom(0.8));
       document.getElementById('btn-zoom-fit').addEventListener('click', fitCanvasToWall);
@@ -1657,14 +1661,10 @@
         if (foundIdx !== -1) {
           const p = state.panels[foundIdx];
           els.tooltipColorDot.style.backgroundColor = p.color.bg;
-          els.tooltipTitle.textContent = p.isStandard
-            ? `${p.w} × ${p.h} mm ${p.rotated ? '(회전배치)' : ''}`
-            : `추가제작 ${p.w} × ${p.h} mm`;
+          els.tooltipTitle.textContent = p.isStandard ? `${p.w} × ${p.h} mm ${p.rotated ? '(회전배치)' : ''}` : `추가제작 ${p.w} × ${p.h} mm`;
           els.tooltipArea.textContent = `면적: ${((p.w * p.h) / 1_000_000).toFixed(3)} ㎡`;
           els.tooltipPos.textContent = `좌표: X ${p.x}~${p.x + p.w}, Y ${p.y}~${p.y + p.h}`;
-          els.tooltipStatus.textContent = p.isStandard
-            ? `● 기성 규격 자재 (원판 ${p.origW}×${p.origH})`
-            : '▲ 미산출 잔여 영역 (추가 제작 필요)';
+          els.tooltipStatus.textContent = p.isStandard ? `● 기성 규격 자재` : '▲ 미산출 잔여 영역 (추가 제작 필요)';
           els.tooltipStatus.className = p.isStandard ? 'text-emerald-400' : 'text-rose-400';
 
           els.tooltip.classList.remove('hidden');
@@ -1679,12 +1679,18 @@
         state.isDragging = false;
       });
 
-      // 터치 팬 지원
       els.canvasWrapper.addEventListener('touchstart', (e) => {
         if (e.touches.length === 1) {
           state.isDragging = true;
           state.dragStartX = e.touches[0].clientX - state.panX;
           state.dragStartY = e.touches[0].clientY - state.panY;
+        } else if (e.touches.length === 2) {
+          state.isDragging = false;
+          state.touchStartDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          state.touchStartZoom = state.zoom;
         }
       }, { passive: true });
 
@@ -1693,11 +1699,30 @@
           state.panX = e.touches[0].clientX - state.dragStartX;
           state.panY = e.touches[0].clientY - state.dragStartY;
           drawCanvas();
+        } else if (e.touches.length === 2) {
+          const dist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          if (state.touchStartDist > 0) {
+            const factor = dist / state.touchStartDist;
+            const rect = els.canvasWrapper.getBoundingClientRect();
+            const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+            const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+            const newZoom = Math.max(0.01, Math.min(2.5, state.touchStartZoom * factor));
+            const ratio = newZoom / state.zoom;
+            state.panX = cx - (cx - state.panX) * ratio;
+            state.panY = cy - (cy - state.panY) * ratio;
+            state.zoom = newZoom;
+            updateZoomLabel();
+            drawCanvas();
+          }
         }
       }, { passive: true });
 
       els.canvasWrapper.addEventListener('touchend', () => {
         state.isDragging = false;
+        state.touchStartDist = 0;
       });
 
       window.addEventListener('resize', resizeCanvas);
@@ -1718,7 +1743,6 @@
       drawCanvas();
     }
 
-    // 앱 초기화
     window.onload = function () {
       renderMaterialList();
       bindEvents();
